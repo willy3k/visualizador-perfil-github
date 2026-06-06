@@ -7,7 +7,7 @@ const inputSearch = document.getElementById('input-search');
 const profileResult = document.querySelector('.profile-results');
 
 
-btnSearch.addEventListener('click', async function () {
+async function getUserProfile() {
     const userName = inputSearch.value;
 
     if (!userName) {
@@ -35,5 +35,13 @@ btnSearch.addEventListener('click', async function () {
       alert('Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde.');
       profileResult.innerHTML = '';
     }
-  });
+  };
+
+  btnSearch.addEventListener('click', getUserProfile);
+
+inputSearch.addEventListener('keyup', (event) => {
+  if (event.key === 'Enter') {
+    btnSearch.click();
+  }
+});
 
