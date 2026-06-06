@@ -1,19 +1,20 @@
-export const elements = {
-  btnSearch: document.getElementById('btn-search'),
-  inputSearch: document.getElementById('input-search'),
-  profileResult: document.querySelector('.profile-results'),
-};
-
-export function showLoading(target) {
-  target.innerHTML = '<p class="loading">Carregando...</p>';
-}
-
-export function clearResults(target) {
-  target.innerHTML = '';
-}
-
 // Função para renderizar o perfil do usuário
-export function renderProfile(userDate, target) {
+export function renderProfile(userDate, userRepos, target) {
+
+  const repositoriesHTML = userRepos &&userRepos.length > 0 ? userRepos.map(repo => `
+    <a href="${repo.html_url}" target="_blank">
+      <div class="repository-card">
+          <h3>${repo.name}</h3>
+          <div class="repository-stats">
+              <span> ⭐ Stars: ${repo.stargazers_count} </span>
+              <span> 🍴 Forks: ${repo.forks_count} </span>
+              <span> 👀 Watchers: ${repo.watchers_count} </span>
+              <span> 💻 Linguagem: ${repo.language || 'Não informada'} </span>
+          </div>
+      </div>
+    </a>
+    `).join('') : `<p> Nenhum repositorio encontrado 😔 </p>`;
+
   target.innerHTML = `
     <div class="profile-card">
       <img src="${userDate.avatar_url}" alt="Foto de perfil de ${userDate.name}" class="profile-avatar">
@@ -33,9 +34,12 @@ export function renderProfile(userDate, target) {
         <span>${userDate.following}</span>
       </div>
     </div>
-  `;
-}
 
-export function showAlert(message) {
-  alert(message);
+    <div class="profile-repositorie">
+       <h2> Repositórios</h2>
+       <div class="repositories">
+            ${repositoriesHTML}
+        </div>
+     </div>
+  `;
 }

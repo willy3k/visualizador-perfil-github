@@ -27,8 +27,16 @@
     max-width: 100%;
   }
   
-  .repositories ul { 
-    grid-template-columns: 1fr; 
+  .repositories {
+    justify-content: center;
+  }
+  
+  .repository-card {
+    flex: 1 1 100%;
+  }
+  
+  .repository-stats span {
+    font-size: 0.95rem;
   }
   
   .container .profile-data .info { 

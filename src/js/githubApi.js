@@ -2,12 +2,21 @@ const BASE_URL = 'https://api.github.com';
 
 export async function getGithubUser(userName) {
   const response = await fetch(`${BASE_URL}/users/${userName}`);
-  const data = await response.json();
 
-  // Retorna um objeto com as informações de sucesso, status e dados
-  return {
-    ok: response.ok,
-    status: response.status,
-    data,
-  };
+  if (!response.ok) {
+    throw new Error(`Usuario não encontrado: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+export async function getGithubRepos(userName) {
+
+  const response = await fetch(`${BASE_URL}/users/${userName}/repos?per_page=10&sort=created`);
+  
+  if (!response.ok) {
+    throw new Error(`Erro ao obter repositórios: ${response.status}`);
+  }
+
+  return await response.json();
 }

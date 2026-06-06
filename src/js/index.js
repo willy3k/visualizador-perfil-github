@@ -1,41 +1,39 @@
-import { getGithubUser } from './githubApi.js';
-import { elements, showLoading, clearResults, renderProfile, showAlert } from './profileViws.js';
+import { getGithubUser, getGithubRepos } from './githubApi.js';
+import { renderProfile } from './profileViws.js';
 
-async function handleSearch() {
-  // Obtém o nome de usuário digitado no campo de pesquisa
-  const userName = elements.inputSearch.value.trim();
 
-  // Valida se o campo de pesquisa está vazio
-  if (!userName) {
-    showAlert('Por favor, digite algo para pesquisar!');
-    clearResults(elements.profileResult);
-    return;
-  }
+const btnSearch = document.getElementById('btn-search');
+const inputSearch = document.getElementById('input-search');
+const profileResult = document.querySelector('.profile-results');
 
-  showLoading(elements.profileResult);
 
-  // Tenta buscar as informações do usuário no GitHub e renderizar o perfil
-  try {
-    // Chama a função para obter os dados do usuário e aguarda a resposta
-    const { ok, status, data } = await getGithubUser(userName);
+btnSearch.addEventListener('click', async function () {
+    const userName = inputSearch.value;
 
-    // Verifica se a resposta da API foi bem-sucedida (status 200-299)
-    if (!ok) {
-      clearResults(elements.profileResult);
-      showAlert('Usuário não encontrado. por favor, verifique o nome digitado e tente novamente.');
-      console.warn('GitHub API retornou status:', status);
+    if (!userName) {
+      alert('Por favor, digite algo para pesquisar!');
+      profileResult.innerHTML = '';
       return;
     }
 
-    // Renderiza o perfil do usuário usando os dados retornados
-    renderProfile(data, elements.profileResult);
-    
-  } catch (error) {
-    clearResults(elements.profileResult);
-    console.error('Erro ao buscar o usuário:', error);
-    showAlert('Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde.');
-  }
-}
-// Adiciona o evento de clique ao botão de pesquisa
-elements.btnSearch.addEventListener('click', handleSearch);
+    // Mostra a mensagem de carregamento
+    profileResult.innerHTML = '<p class="loading">Carregando...</p>';
+
+    // Tenta buscar as informações do usuário no GitHub e renderizar o perfil
+    try {
+      // Chama a função para obter os dados do usuário e aguarda a resposta
+      const userData = await getGithubUser(userName);
+      const userRepos = await getGithubRepos(userName);
+      console.log(userRepos);
+      
+      // Renderiza o perfil do usuário usando os dados retornados
+      renderProfile(userData, userRepos, profileResult);
+
+    } catch (error) {
+
+      console.error('Erro ao buscar o usuário:', error);
+      alert('Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde.');
+      profileResult.innerHTML = '';
+    }
+  });
 
