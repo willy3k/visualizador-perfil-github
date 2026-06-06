@@ -1,52 +1,41 @@
-// 1. Pegamos o elemento do botão pelo ID dele
-const btnSearch = document.getElementById('btn-search');
+import { getGithubUser } from './githubApi.js';
+import { elements, showLoading, clearResults, renderProfile, showAlert } from './profileViws.js';
 
-// 2. Pegamos o elemento do input pelo ID dele
-const inputSearch = document.getElementById('input-search');
+async function handleSearch() {
+  // Obtém o nome de usuário digitado no campo de pesquisa
+  const userName = elements.inputSearch.value.trim();
 
-const profileResult = document.querySelector('.profile-results');
+  // Valida se o campo de pesquisa está vazio
+  if (!userName) {
+    showAlert('Por favor, digite algo para pesquisar!');
+    clearResults(elements.profileResult);
+    return;
+  }
 
+  showLoading(elements.profileResult);
 
-const BASE_URL = 'https://api.github.com';
+  // Tenta buscar as informações do usuário no GitHub e renderizar o perfil
+  try {
+    // Chama a função para obter os dados do usuário e aguarda a resposta
+    const { ok, status, data } = await getGithubUser(userName);
 
-// 3. Adicionamos um "ouvinte de evento" (event listener) que vai disparar quando o botão for clicado
-btnSearch.addEventListener('click', async () => {
-    const userName = inputSearch.value;
-
-    if (userName) {
-        // Mostra o carregamento antes de começar a busca
-        profileResult.innerHTML = '<p class="loading">Carregando...</p>';
-
-        try {
-            const response = await fetch(`${BASE_URL}/users/${userName}`);
-
-            
-            if (!response.ok) {
-                alert('Usuário não encontrado. por favor, verifique o nome digitado e tente novamente.');
-                profileResult.innerHTML = ''; // Limpa o resultado anterior
-                return;
-            }
-
-            const userDate = await response.json();
-
-            console.log(userDate);
-
-            profileResult.innerHTML = `
-            <div class="profile-card">
-               <img src="${userDate.avatar_url}" alt="Foto de perfil de ${userDate.name}" class="profile-avatar">
-               <div class="profile-info">
-                  <h2>${userDate.name}</h2>
-                  <p>${userDate.bio || 'Não possui bio cadastrada 😔'}</p>
-            
-                </div> 
-            </div>`;
-
-        } catch (error) {
-            alert('Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde.');
-        }
-
-    } else {
-        alert('Por favor, digite algo para pesquisar!');
+    // Verifica se a resposta da API foi bem-sucedida (status 200-299)
+    if (!ok) {
+      clearResults(elements.profileResult);
+      showAlert('Usuário não encontrado. por favor, verifique o nome digitado e tente novamente.');
+      console.warn('GitHub API retornou status:', status);
+      return;
     }
 
-});
+    // Renderiza o perfil do usuário usando os dados retornados
+    renderProfile(data, elements.profileResult);
+    
+  } catch (error) {
+    clearResults(elements.profileResult);
+    console.error('Erro ao buscar o usuário:', error);
+    showAlert('Ocorreu um erro ao buscar o usuário. Tente novamente mais tarde.');
+  }
+}
+// Adiciona o evento de clique ao botão de pesquisa
+elements.btnSearch.addEventListener('click', handleSearch);
+
